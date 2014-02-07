@@ -225,6 +225,12 @@ ol.MapBrowserEventHandler.prototype.handlePointerUp_ = function(browserEvent) {
   this.dispatchEvent(newEvent);
 
   if (this.activePointers_ <= 0) {
+    this.pointerEventHandler_.unlistenOnDocument(
+        ol.MapBrowserEvent.EventType.POINTERMOVE,
+        this.handlePointerMove_, false, this);
+    this.pointerEventHandler_.unlistenOnDocument(
+        ol.MapBrowserEvent.EventType.POINTERUP,
+        this.handlePointerUp_, false, this);
     goog.array.forEach(this.dragListenerKeys_, goog.events.unlistenByKey);
     this.dragListenerKeys_ = null;
   }
@@ -255,13 +261,16 @@ ol.MapBrowserEventHandler.prototype.handlePointerDown_ =
   this.dragged_ = false;
 
   if (goog.isNull(this.dragListenerKeys_)) {
+    this.pointerEventHandler_.listenOnDocument(
+        ol.MapBrowserEvent.EventType.POINTERMOVE,
+        this.handlePointerMove_, false, this);
+    this.pointerEventHandler_.listenOnDocument(
+        ol.MapBrowserEvent.EventType.POINTERUP,
+        this.handlePointerUp_, false, this);
+
     this.dragListenerKeys_ = [
       goog.events.listen(this.pointerEventHandler_,
-          ol.MapBrowserEvent.EventType.POINTERMOVE,
-          this.handlePointerMove_, false, this),
-      goog.events.listen(this.pointerEventHandler_,
-          [ol.MapBrowserEvent.EventType.POINTERUP,
-           ol.MapBrowserEvent.EventType.POINTERCANCEL],
+          [ol.MapBrowserEvent.EventType.POINTERCANCEL],
           this.handlePointerUp_, false, this)
     ];
   }
@@ -342,6 +351,7 @@ ol.MapBrowserEvent.EventType = {
   POINTERDOWN: 'pointerdown',
   POINTERUP: 'pointerup',
   POINTEROVER: 'pointerover',
+  POINTEROUT: 'pointerout',
   POINTERENTER: 'pointerenter',
   POINTERLEAVE: 'pointerleave',
   POINTERCANCEL: 'pointercancel'
