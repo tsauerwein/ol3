@@ -161,6 +161,11 @@ ol.MapBrowserEventHandler = function(map) {
    * @private
    */
   this.activePointers_ = 0;
+
+  /**
+   * @type {Object.<number, boolean>}
+   * @private
+   */
   this.trackedTouches_ = {};
 
   /**
@@ -168,6 +173,7 @@ ol.MapBrowserEventHandler = function(map) {
    * @private
    */
   this.pointerEventHandler_ = new ol.pointer.PointerEventHandler(element);
+
   this.pointerdownListenerKey_ = goog.events.listen(this.pointerEventHandler_,
       ol.pointer.EventType.POINTERDOWN,
       this.handlePointerDown_, false, this);
