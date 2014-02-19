@@ -81,7 +81,7 @@ ol.interaction.PointerInteraction.isTouchEvent_ = function(mapBrowserEvent) {
 ol.interaction.PointerInteraction.prototype.updateTrackedTouches_ =
     function(mapBrowserEvent) {
   if (ol.interaction.PointerInteraction.isTouchEvent_(mapBrowserEvent)) {
-    var event = mapBrowserEvent.originalEvent;
+    var event = mapBrowserEvent.pointerEvent;
 
     if (mapBrowserEvent.type == ol.MapBrowserEvent.EventType.POINTERUP) {
       delete this.trackedTouches_[event.pointerId];
