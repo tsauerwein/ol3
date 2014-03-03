@@ -355,6 +355,7 @@ ol.interaction.Modify.prototype.createOrUpdateVertexFeature_ =
  * @inheritDoc
  */
 ol.interaction.Modify.prototype.handlePointerDown = function(evt) {
+  this.handlePointerAtPixel_(evt.pixel, evt.map);
   this.dragSegments_ = [];
   var vertexFeature = this.vertexFeature_;
   if (!goog.isNull(vertexFeature)) {
