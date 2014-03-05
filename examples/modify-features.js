@@ -166,7 +166,7 @@ var vectorLayer = new ol.layer.Vector({
 });
 
 // FIXME Handle this elsewhere - this is only to not render selected features
-// on the original layer
+// on the original layer, and it does not work for MultiGeometry geometries.
 vectorLayer.setRenderGeometryFunctions(new ol.Collection([function(geometry) {
   var selected = select.getFeatures().getArray();
   for (var i = 0, ii = selected.length; i < ii; ++i) {
