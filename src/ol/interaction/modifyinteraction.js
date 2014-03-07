@@ -453,6 +453,7 @@ ol.interaction.Modify.prototype.handlePointerUp = function(evt) {
     this.rBush_.update(ol.extent.boundingExtent(segmentData.segment),
         segmentData);
   }
+  return false;
 };
 
 
