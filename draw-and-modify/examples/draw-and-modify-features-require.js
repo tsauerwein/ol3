@@ -1,8 +1,7 @@
 goog.require('ol.FeatureOverlay');
 goog.require('ol.Map');
 goog.require('ol.View2D');
-goog.require('ol.events.condition.shiftKeyOnly');
-goog.require('ol.events.condition.singleClick');
+goog.require('ol.events.condition');
 goog.require('ol.interaction');
 goog.require('ol.interaction.Draw');
 goog.require('ol.interaction.Modify');

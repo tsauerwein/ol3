@@ -37055,6 +37055,7 @@ goog.exportSymbol("ol.easing.upAndDown", ol.easing.upAndDown);
 goog.exportSymbol("ol.events.condition.altKeyOnly", ol.events.condition.altKeyOnly);
 goog.exportSymbol("ol.events.condition.altShiftKeysOnly", ol.events.condition.altShiftKeysOnly);
 goog.exportSymbol("ol.events.condition.always", ol.events.condition.always);
+goog.exportSymbol("ol.events.condition.mouseOnly", ol.events.condition.mouseOnly);
 goog.exportSymbol("ol.events.condition.never", ol.events.condition.never);
 goog.exportSymbol("ol.events.condition.noModifierKeys", ol.events.condition.noModifierKeys);
 goog.exportSymbol("ol.events.condition.platformModifierKeyOnly", ol.events.condition.platformModifierKeyOnly);
