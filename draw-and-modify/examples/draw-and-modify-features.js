@@ -35,7 +35,13 @@ var featureOverlay = new ol.FeatureOverlay({
 featureOverlay.setMap(map);
 
 var modify = new ol.interaction.Modify({
-  features: featureOverlay.getFeatures()
+  features: featureOverlay.getFeatures(),
+  // the SHIFT key must be pressed to delete vertices, so
+  // that new vertices can be drawn at the same position
+  // of existing vertices
+  deleteCondition: goog.functions.and(
+      ol.events.condition.shiftKeyOnly,
+      ol.events.condition.singleClick)
 });
 map.addInteraction(modify);
 
@@ -49,6 +55,8 @@ function addInteraction() {
 }
 
 var typeSelect = document.getElementById('type');
+
+
 /**
  * Let user change the geometry type.
  * @param {Event} e Change event.
