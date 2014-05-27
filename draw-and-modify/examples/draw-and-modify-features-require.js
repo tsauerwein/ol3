@@ -1,4 +1,3 @@
-goog.require('goog.functions');
 goog.require('ol.FeatureOverlay');
 goog.require('ol.Map');
 goog.require('ol.View2D');

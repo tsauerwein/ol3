@@ -39,9 +39,10 @@ var modify = new ol.interaction.Modify({
   // the SHIFT key must be pressed to delete vertices, so
   // that new vertices can be drawn at the same position
   // of existing vertices
-  deleteCondition: goog.functions.and(
-      ol.events.condition.shiftKeyOnly,
-      ol.events.condition.singleClick)
+  deleteCondition: function(event) {
+    return ol.events.condition.shiftKeyOnly(event) &&
+        ol.events.condition.singleClick(event);
+  }
 });
 map.addInteraction(modify);
 
