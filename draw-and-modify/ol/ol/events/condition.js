@@ -67,6 +67,7 @@ ol.events.condition.never = goog.functions.FALSE;
 /**
  * @param {ol.MapBrowserEvent} mapBrowserEvent Map browser event.
  * @return {boolean} True if the event is a `singleclick` event.
+ * @todo api
  */
 ol.events.condition.singleClick = function(mapBrowserEvent) {
   return mapBrowserEvent.type == ol.MapBrowserEvent.EventType.SINGLECLICK;
