@@ -1,7 +1,7 @@
 goog.provide('ol.style.Icon');
-goog.provide('ol.style.IconAnchorOrigin');
 goog.provide('ol.style.IconAnchorUnits');
 goog.provide('ol.style.IconImageCache');
+goog.provide('ol.style.IconOrigin');
 
 goog.require('goog.array');
 goog.require('goog.asserts');
@@ -16,20 +16,20 @@ goog.require('ol.style.ImageState');
 /**
  * @enum {string}
  */
-ol.style.IconAnchorOrigin = {
-  BOTTOM_LEFT: 'bottom-left',
-  BOTTOM_RIGHT: 'bottom-right',
-  TOP_LEFT: 'top-left',
-  TOP_RIGHT: 'top-right'
+ol.style.IconAnchorUnits = {
+  FRACTION: 'fraction',
+  PIXELS: 'pixels'
 };
 
 
 /**
  * @enum {string}
  */
-ol.style.IconAnchorUnits = {
-  FRACTION: 'fraction',
-  PIXELS: 'pixels'
+ol.style.IconOrigin = {
+  BOTTOM_LEFT: 'bottom-left',
+  BOTTOM_RIGHT: 'bottom-right',
+  TOP_LEFT: 'top-left',
+  TOP_RIGHT: 'top-right'
 };
 
 
@@ -58,10 +58,10 @@ ol.style.Icon = function(opt_options) {
 
   /**
    * @private
-   * @type {ol.style.IconAnchorOrigin}
+   * @type {ol.style.IconOrigin}
    */
   this.anchorOrigin_ = goog.isDef(options.anchorOrigin) ?
-      options.anchorOrigin : ol.style.IconAnchorOrigin.TOP_LEFT;
+      options.anchorOrigin : ol.style.IconOrigin.TOP_LEFT;
 
   /**
    * @private
@@ -84,10 +84,51 @@ ol.style.Icon = function(opt_options) {
       goog.isDef(options.crossOrigin) ? options.crossOrigin : null;
 
   /**
+   * @type {Image}
+   */
+  var image = goog.isDef(options.img) ? options.img : null;
+
+  /**
+   * @type {string|undefined}
+   */
+  var src = options.src;
+
+  if ((!goog.isDef(src) || src.length === 0) && !goog.isNull(image)) {
+    src = image.src;
+  }
+  goog.asserts.assert(goog.isDef(src) && src.length > 0);
+
+  /**
+   * @type {ol.style.ImageState}
+   */
+  var imageState = goog.isDef(options.src) ?
+      ol.style.ImageState.IDLE : ol.style.ImageState.LOADED;
+
+  /**
    * @private
    * @type {ol.style.IconImage_}
    */
-  this.iconImage_ = ol.style.IconImage_.get(options.src, crossOrigin);
+  this.iconImage_ = ol.style.IconImage_.get(
+      image, src, crossOrigin, imageState);
+
+  /**
+   * @private
+   * @type {Array.<number>}
+   */
+  this.offset_ = goog.isDef(options.offset) ? options.offset : [0, 0];
+
+  /**
+   * @private
+   * @type {ol.style.IconOrigin}
+   */
+  this.offsetOrigin_ = goog.isDef(options.offsetOrigin) ?
+      options.offsetOrigin : ol.style.IconOrigin.TOP_LEFT;
+
+  /**
+   * @private
+   * @type {Array.<number>}
+   */
+  this.origin_ = null;
 
   /**
    * @private
@@ -99,12 +140,6 @@ ol.style.Icon = function(opt_options) {
    * @type {number}
    */
   var opacity = goog.isDef(options.opacity) ? options.opacity : 1;
-
-  /**
-   * @private
-   * @type {Array.<number>}
-   */
-  var origin = goog.isDef(options.origin) ? options.origin : [0, 0];
 
   /**
    * @type {boolean}
@@ -130,7 +165,6 @@ ol.style.Icon = function(opt_options) {
 
   goog.base(this, {
     opacity: opacity,
-    origin: origin,
     rotation: rotation,
     scale: scale,
     snapToPixel: snapToPixel,
@@ -165,19 +199,19 @@ ol.style.Icon.prototype.getAnchor = function() {
     }
   }
 
-  if (this.anchorOrigin_ != ol.style.IconAnchorOrigin.TOP_LEFT) {
+  if (this.anchorOrigin_ != ol.style.IconOrigin.TOP_LEFT) {
     if (goog.isNull(size)) {
       return null;
     }
     if (anchor === this.anchor_) {
       anchor = this.anchor_.slice();
     }
-    if (this.anchorOrigin_ == ol.style.IconAnchorOrigin.TOP_RIGHT ||
-        this.anchorOrigin_ == ol.style.IconAnchorOrigin.BOTTOM_RIGHT) {
+    if (this.anchorOrigin_ == ol.style.IconOrigin.TOP_RIGHT ||
+        this.anchorOrigin_ == ol.style.IconOrigin.BOTTOM_RIGHT) {
       anchor[0] = -anchor[0] + size[0];
     }
-    if (this.anchorOrigin_ == ol.style.IconAnchorOrigin.BOTTOM_LEFT ||
-        this.anchorOrigin_ == ol.style.IconAnchorOrigin.BOTTOM_RIGHT) {
+    if (this.anchorOrigin_ == ol.style.IconOrigin.BOTTOM_LEFT ||
+        this.anchorOrigin_ == ol.style.IconOrigin.BOTTOM_RIGHT) {
       anchor[1] = -anchor[1] + size[1];
     }
   }
@@ -208,6 +242,37 @@ ol.style.Icon.prototype.getImageState = function() {
  */
 ol.style.Icon.prototype.getHitDetectionImage = function(pixelRatio) {
   return this.iconImage_.getHitDetectionImage(pixelRatio);
+};
+
+
+/**
+ * @inheritDoc
+ * @todo api
+ */
+ol.style.Icon.prototype.getOrigin = function() {
+  if (!goog.isNull(this.origin_)) {
+    return this.origin_;
+  }
+  var offset = this.offset_;
+
+  if (this.offsetOrigin_ != ol.style.IconOrigin.TOP_LEFT) {
+    var size = this.getSize();
+    var iconImageSize = this.iconImage_.getSize();
+    if (goog.isNull(size) || goog.isNull(iconImageSize)) {
+      return null;
+    }
+    offset = offset.slice();
+    if (this.offsetOrigin_ == ol.style.IconOrigin.TOP_RIGHT ||
+        this.offsetOrigin_ == ol.style.IconOrigin.BOTTOM_RIGHT) {
+      offset[0] = iconImageSize[0] - size[0] - offset[0];
+    }
+    if (this.offsetOrigin_ == ol.style.IconOrigin.BOTTOM_LEFT ||
+        this.offsetOrigin_ == ol.style.IconOrigin.BOTTOM_RIGHT) {
+      offset[1] = iconImageSize[1] - size[1] - offset[1];
+    }
+  }
+  this.origin_ = offset;
+  return this.origin_;
 };
 
 
@@ -258,12 +323,14 @@ ol.style.Icon.prototype.unlistenImageChange = function(listener, thisArg) {
 
 /**
  * @constructor
- * @param {string} src Src.
+ * @param {Image} image Image.
+ * @param {string|undefined} src Src.
  * @param {?string} crossOrigin Cross origin.
+ * @param {ol.style.ImageState} imageState Image state.
  * @extends {goog.events.EventTarget}
  * @private
  */
-ol.style.IconImage_ = function(src, crossOrigin) {
+ol.style.IconImage_ = function(image, src, crossOrigin, imageState) {
 
   goog.base(this);
 
@@ -277,7 +344,7 @@ ol.style.IconImage_ = function(src, crossOrigin) {
    * @private
    * @type {Image}
    */
-  this.image_ = new Image();
+  this.image_ = goog.isNull(image) ? new Image() : image;
 
   if (!goog.isNull(crossOrigin)) {
     this.image_.crossOrigin = crossOrigin;
@@ -293,7 +360,7 @@ ol.style.IconImage_ = function(src, crossOrigin) {
    * @private
    * @type {ol.style.ImageState}
    */
-  this.imageState_ = ol.style.ImageState.IDLE;
+  this.imageState_ = imageState;
 
   /**
    * @private
@@ -303,7 +370,7 @@ ol.style.IconImage_ = function(src, crossOrigin) {
 
   /**
    * @private
-   * @type {string}
+   * @type {string|undefined}
    */
   this.src_ = src;
 
@@ -318,15 +385,17 @@ goog.inherits(ol.style.IconImage_, goog.events.EventTarget);
 
 
 /**
+ * @param {Image} image Image.
  * @param {string} src Src.
  * @param {?string} crossOrigin Cross origin.
+ * @param {ol.style.ImageState} imageState Image state.
  * @return {ol.style.IconImage_} Icon image.
  */
-ol.style.IconImage_.get = function(src, crossOrigin) {
+ol.style.IconImage_.get = function(image, src, crossOrigin, imageState) {
   var iconImageCache = ol.style.IconImageCache.getInstance();
   var iconImage = iconImageCache.get(src, crossOrigin);
   if (goog.isNull(iconImage)) {
-    iconImage = new ol.style.IconImage_(src, crossOrigin);
+    iconImage = new ol.style.IconImage_(image, src, crossOrigin, imageState);
     iconImageCache.set(src, crossOrigin, iconImage);
   }
   return iconImage;
