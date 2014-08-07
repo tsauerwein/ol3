@@ -33,7 +33,7 @@ var vector = new ol.layer.Vector({
   }),
   style: new ol.style.Style({
     fill: new ol.style.Fill({
-      color: 'rgba(255, 255, 255, 0.6)'
+      color: 'rgba(255, 255, 255, 0.1)'
     }),
     stroke: new ol.style.Stroke({
       color: '#319FD3',
@@ -46,10 +46,10 @@ var olMapDiv = document.getElementById('ol-map');
 var map = new ol.Map({
   layers: [vector],
   interactions: ol.interaction.defaults({
-    altShiftDragRotate: false,
-    dragPan: false,
-    rotate: false
-  }).extend([new ol.interaction.DragPan({kinetic: null})]),
+    dragPan: false
+  }).extend([
+    new ol.interaction.DragPan({kinetic: null})
+  ]),
   target: olMapDiv,
   view: view
 });
