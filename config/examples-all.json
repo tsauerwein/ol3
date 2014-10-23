@@ -19,7 +19,8 @@
       "externs/proj4js.js",
       "externs/tilejson.js",
       "externs/topojson.js",
-      "externs/vbarray.js"
+      "externs/vbarray.js",
+      "externs/rbush.js"
     ],
     "define": [
       "goog.array.ASSUME_NATIVE_FUNCTIONS=true",
