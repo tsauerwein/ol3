@@ -96,6 +96,18 @@ ol.style.Icon = function(opt_options) {
   var image = goog.isDef(options.img) ? options.img : null;
 
   /**
+   * @private
+   * @type {Image|HTMLCanvasElement}
+   */
+  this.hitDetectionImage_ = null;
+
+  /**
+   * @private
+   * @type {Array.<number>}
+   */
+  this.hitDetectionOrigin_ = null;
+
+  /**
    * @type {string|undefined}
    */
   var src = options.src;
@@ -116,7 +128,8 @@ ol.style.Icon = function(opt_options) {
    * @type {ol.style.IconImage_}
    */
   this.iconImage_ = ol.style.IconImage_.get(
-      image, src, crossOrigin, imageState);
+      image, src, crossOrigin, imageState,
+      this.assignHitDetectionImage_, this);
 
   /**
    * @private
@@ -250,7 +263,12 @@ ol.style.Icon.prototype.getImageSize = function() {
  * @inheritDoc
  */
 ol.style.Icon.prototype.getHitDetectionImageSize = function() {
-  return this.getImageSize();
+  // the hit-detection image might grow, so it is important to get
+  // the size directly from the image
+  return [
+    this.getHitDetectionImage(-1).width,
+    this.getHitDetectionImage(-1).height
+  ];
 };
 
 
@@ -259,14 +277,6 @@ ol.style.Icon.prototype.getHitDetectionImageSize = function() {
  */
 ol.style.Icon.prototype.getImageState = function() {
   return this.iconImage_.getImageState();
-};
-
-
-/**
- * @inheritDoc
- */
-ol.style.Icon.prototype.getHitDetectionImage = function(pixelRatio) {
-  return this.iconImage_.getHitDetectionImage(pixelRatio);
 };
 
 
@@ -302,10 +312,36 @@ ol.style.Icon.prototype.getOrigin = function() {
 
 
 /**
+ * @private
+ * @param {ol.style.IconImage_} iconImage The loaded icon image.
+ */
+ol.style.Icon.prototype.assignHitDetectionImage_ = function(iconImage) {
+  if (iconImage.getImageState() !== ol.style.ImageState.LOADED) {
+    return;
+  }
+  if (!iconImage.isTainted()) {
+    this.hitDetectionImage_ = this.getImage(-1);
+    this.hitDetectionOrigin_ = this.getOrigin();
+  } else {
+    this.hitDetectionImage_ = ol.style.HitDetectionCanvas_.get(this.getSize());
+    this.hitDetectionOrigin_ = [0, 0];
+  }
+};
+
+
+/**
+ * @inheritDoc
+ */
+ol.style.Icon.prototype.getHitDetectionImage = function(pixelRatio) {
+  return this.hitDetectionImage_;
+};
+
+
+/**
  * @inheritDoc
  */
 ol.style.Icon.prototype.getHitDetectionOrigin = function() {
-  return this.getOrigin();
+  return this.hitDetectionOrigin_;
 };
 
 
@@ -369,12 +405,6 @@ ol.style.IconImage_ = function(image, src, crossOrigin, imageState) {
 
   /**
    * @private
-   * @type {Image|HTMLCanvasElement}
-   */
-  this.hitDetectionImage_ = null;
-
-  /**
-   * @private
    * @type {Image}
    */
   this.image_ = goog.isNull(image) ? new Image() : image;
@@ -422,14 +452,23 @@ goog.inherits(ol.style.IconImage_, goog.events.EventTarget);
  * @param {string} src Src.
  * @param {?string} crossOrigin Cross origin.
  * @param {ol.style.ImageState} imageState Image state.
+ * @param {function(ol.style.IconImage_)} callbackImageLoaded Callback.
+ * @param {Object} thisArg This.
  * @return {ol.style.IconImage_} Icon image.
  */
-ol.style.IconImage_.get = function(image, src, crossOrigin, imageState) {
+ol.style.IconImage_.get = function(
+    image, src, crossOrigin, imageState, callbackImageLoaded, thisArg) {
   var iconImageCache = ol.style.IconImageCache.getInstance();
   var iconImage = iconImageCache.get(src, crossOrigin);
   if (goog.isNull(iconImage)) {
     iconImage = new ol.style.IconImage_(image, src, crossOrigin, imageState);
     iconImageCache.set(src, crossOrigin, iconImage);
+  }
+  if (iconImage.getImageState() === ol.style.ImageState.LOADED) {
+    callbackImageLoaded.call(thisArg, iconImage);
+  } else {
+    goog.events.listenOnce(iconImage, goog.events.EventType.CHANGE,
+        goog.bind(callbackImageLoaded, thisArg, iconImage));
   }
   return iconImage;
 };
@@ -446,6 +485,14 @@ ol.style.IconImage_.prototype.determineTainting_ = function() {
   } catch (e) {
     this.tainting_ = true;
   }
+};
+
+
+/**
+ * @return {boolean} Is the image tainted?
+ */
+ol.style.IconImage_.prototype.isTainted = function() {
+  return this.tainting_;
 };
 
 
@@ -493,26 +540,6 @@ ol.style.IconImage_.prototype.getImage = function(pixelRatio) {
  */
 ol.style.IconImage_.prototype.getImageState = function() {
   return this.imageState_;
-};
-
-
-/**
- * @param {number} pixelRatio Pixel ratio.
- * @return {Image|HTMLCanvasElement} Image element.
- */
-ol.style.IconImage_.prototype.getHitDetectionImage = function(pixelRatio) {
-  if (goog.isNull(this.hitDetectionImage_)) {
-    if (this.tainting_) {
-      var width = this.size_[0];
-      var height = this.size_[1];
-      var context = ol.dom.createCanvasContext2D(width, height);
-      context.fillRect(0, 0, width, height);
-      this.hitDetectionImage_ = context.canvas;
-    } else {
-      this.hitDetectionImage_ = this.image_;
-    }
-  }
-  return this.hitDetectionImage_;
 };
 
 
@@ -653,4 +680,69 @@ ol.style.IconImageCache.prototype.set = function(src, crossOrigin, iconImage) {
   var key = ol.style.IconImageCache.getKey(src, crossOrigin);
   this.cache_[key] = iconImage;
   ++this.cacheSize_;
+};
+
+
+
+/**
+ * @constructor
+ * @private
+ */
+ol.style.HitDetectionCanvas_ = function() {
+
+  /**
+   * @type {HTMLCanvasElement}
+   * @private
+   */
+  this.canvas_ = null;
+
+  /**
+   * @type {CanvasRenderingContext2D}
+   * @private
+   */
+  this.context_ = null;
+
+};
+goog.addSingletonGetter(ol.style.HitDetectionCanvas_);
+
+
+/**
+ * @param {ol.Size} size
+ * @return {HTMLCanvasElement}
+ */
+ol.style.HitDetectionCanvas_.get = function(size) {
+  return ol.style.HitDetectionCanvas_.getInstance().getCanvas(size);
+};
+
+
+/**
+ * @param {ol.Size} size
+ * @return {HTMLCanvasElement}
+ */
+ol.style.HitDetectionCanvas_.prototype.getCanvas = function(size) {
+  if (goog.isNull(this.canvas_) ||
+      this.canvas_.width < size[0] || this.canvas_.height < size[1]) {
+    var newSize = Math.max(this.nextPow2_(size[0]), this.nextPow2_(size[1]));
+
+    if (goog.isNull(this.canvas_)) {
+      this.context_ = ol.dom.createCanvasContext2D(newSize, newSize);
+      this.canvas_ = this.context_.canvas;
+    } else {
+      // adjust the size of the canvas
+      this.canvas_.width = newSize;
+      this.canvas_.height = newSize;
+    }
+    this.context_.fillRect(0, 0, newSize, newSize);
+  }
+  return this.canvas_;
+};
+
+
+/**
+ * @private
+ * @param {number} n Number.
+ * @return {number} The next power of 2 for `n`.
+ */
+ol.style.HitDetectionCanvas_.prototype.nextPow2_ = function(n) {
+  return Math.pow(2, Math.ceil(Math.log(n) / Math.log(2)));
 };
