@@ -108,6 +108,12 @@ ol.style.Icon = function(opt_options) {
   this.hitDetectionOrigin_ = null;
 
   /**
+   * @private
+   * @type {ol.Size}
+   */
+  this.size_ = goog.isDef(options.size) ? options.size : null;
+
+  /**
    * @type {string|undefined}
    */
   var src = options.src;
@@ -149,12 +155,6 @@ ol.style.Icon = function(opt_options) {
    * @type {Array.<number>}
    */
   this.origin_ = null;
-
-  /**
-   * @private
-   * @type {ol.Size}
-   */
-  this.size_ = goog.isDef(options.size) ? options.size : null;
 
   /**
    * @type {number}
@@ -320,8 +320,8 @@ ol.style.Icon.prototype.assignHitDetectionImage_ = function(iconImage) {
     return;
   }
   if (!iconImage.isTainted()) {
-    this.hitDetectionImage_ = this.getImage(-1);
-    this.hitDetectionOrigin_ = this.getOrigin();
+    this.hitDetectionImage_ = iconImage.getImage(-1);
+    this.hitDetectionOrigin_ = null;
   } else {
     this.hitDetectionImage_ = ol.style.HitDetectionCanvas_.get(this.getSize());
     this.hitDetectionOrigin_ = [0, 0];
@@ -341,7 +341,8 @@ ol.style.Icon.prototype.getHitDetectionImage = function(pixelRatio) {
  * @inheritDoc
  */
 ol.style.Icon.prototype.getHitDetectionOrigin = function() {
-  return this.hitDetectionOrigin_;
+  return !goog.isNull(this.hitDetectionOrigin_) ?
+      this.hitDetectionOrigin_ : this.getOrigin();
 };
 
 
@@ -685,6 +686,8 @@ ol.style.IconImageCache.prototype.set = function(src, crossOrigin, iconImage) {
 
 
 /**
+ * Creates a global hit-detection canvas which will be shared among
+ * all tainted icons.
  * @constructor
  * @private
  */

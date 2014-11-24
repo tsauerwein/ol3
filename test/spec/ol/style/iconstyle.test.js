@@ -109,6 +109,101 @@ describe('ol.style.Icon', function() {
       expect(iconStyle.getOrigin()).to.eql([92, 20]);
     });
   });
+
+  describe('#constructor', function() {
+
+    it('it uses a separate hit detection image when tainted', function() {
+      var iconStyle = new ol.style.Icon({
+        src: 'http://some-other-domain.com/test1.png',
+        size: [18, 18],
+        offset: [12, 13]
+      });
+      expect(iconStyle.getSize()).to.eql([18, 18]);
+
+      // simulate tainted image
+      iconStyle.iconImage_.load();
+      iconStyle.iconImage_.tainting_ = true;
+      iconStyle.iconImage_.handleImageLoad_();
+
+      expect(iconStyle.getHitDetectionImage()).not.to.eql(
+          iconStyle.getImage());
+      expect(iconStyle.getHitDetectionImage()).to.eql(
+          ol.style.HitDetectionCanvas_.getInstance().canvas_);
+      expect(iconStyle.getHitDetectionImageSize()).to.eql([32, 32]);
+      expect(iconStyle.getHitDetectionOrigin()).to.eql([0, 0]);
+    });
+
+    it('it uses a separate hit detection image when tainted (already loaded)',
+        function() {
+          var iconStyle = new ol.style.Icon({
+            src: 'http://some-other-domain.com/test2.png',
+            size: [18, 18],
+            offset: [12, 13]
+          });
+          iconStyle.iconImage_.load();
+          iconStyle.iconImage_.tainting_ = true;
+          iconStyle.iconImage_.handleImageLoad_();
+
+          iconStyle = new ol.style.Icon({
+            src: 'http://some-other-domain.com/test2.png',
+            size: [18, 18],
+            offset: [12, 13]
+          });
+          expect(iconStyle.getSize()).to.eql([18, 18]);
+
+          expect(iconStyle.getHitDetectionImage()).not.to.eql(
+              iconStyle.getImage());
+          expect(iconStyle.getHitDetectionImage()).to.eql(
+              ol.style.HitDetectionCanvas_.getInstance().canvas_);
+          expect(iconStyle.getHitDetectionImageSize()).to.eql([32, 32]);
+          expect(iconStyle.getHitDetectionOrigin()).to.eql([0, 0]);
+        });
+
+    it('it uses no separate hit detection image when not tainted', function() {
+      var iconStyle = new ol.style.Icon({
+        src: 'test3.png',
+        size: [18, 18],
+        offset: [12, 13]
+      });
+      expect(iconStyle.getSize()).to.eql([18, 18]);
+
+      // simulate not tainted image
+      iconStyle.iconImage_.load();
+      iconStyle.iconImage_.image_.width = 55;
+      iconStyle.iconImage_.image_.height = 55;
+      iconStyle.iconImage_.handleImageLoad_();
+
+      expect(iconStyle.getHitDetectionImage()).to.eql(
+          iconStyle.getImage());
+      expect(iconStyle.getHitDetectionImageSize()).to.eql([55, 55]);
+      expect(iconStyle.getHitDetectionOrigin()).to.eql([12, 13]);
+    });
+
+    it('it uses no separate hit detection image when not tainted ' +
+        '(already loaded)', function() {
+          var iconStyle = new ol.style.Icon({
+            src: 'test4.png',
+            size: [18, 18],
+            offset: [12, 13]
+          });
+          iconStyle.iconImage_.load();
+          iconStyle.iconImage_.image_.width = 55;
+          iconStyle.iconImage_.image_.height = 55;
+          iconStyle.iconImage_.handleImageLoad_();
+
+          iconStyle = new ol.style.Icon({
+            src: 'test4.png',
+            size: [18, 18],
+            offset: [12, 13]
+          });
+          expect(iconStyle.getSize()).to.eql([18, 18]);
+
+          expect(iconStyle.getHitDetectionImage()).to.eql(
+              iconStyle.getImage());
+          expect(iconStyle.getHitDetectionImageSize()).to.eql([55, 55]);
+          expect(iconStyle.getHitDetectionOrigin()).to.eql([12, 13]);
+        });
+  });
 });
 
 describe('ol.style.IconImageCache', function() {

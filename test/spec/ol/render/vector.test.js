@@ -38,7 +38,7 @@ describe('ol.renderer.vector', function() {
         expect(iconStyleLoadSpy.calledOnce).to.be.ok();
         listeners = goog.events.getListeners(
             iconStyle.iconImage_, goog.events.EventType.CHANGE, false);
-        expect(listeners.length).to.eql(1);
+        expect(listeners.length).to.eql(2);
 
         // call #2
         ol.renderer.vector.renderFeature(replayGroup, feature,
@@ -47,7 +47,7 @@ describe('ol.renderer.vector', function() {
         expect(iconStyleLoadSpy.calledOnce).to.be.ok();
         listeners = goog.events.getListeners(
             iconStyle.iconImage_, goog.events.EventType.CHANGE, false);
-        expect(listeners.length).to.eql(1);
+        expect(listeners.length).to.eql(2);
       });
 
     });
