@@ -1410,7 +1410,8 @@ olx.control.ZoomSliderOptions.prototype.render;
  * @typedef {{className: (string|undefined),
  *     target: (Element|undefined),
  *     tipLabel: (string|undefined),
- *     extent: (ol.Extent|undefined)}}
+ *     extent: (ol.Extent|undefined),
+ *     buttonClassName: (string|undefined)}}
  * @api stable
  */
 olx.control.ZoomToExtentOptions;
@@ -1447,6 +1448,14 @@ olx.control.ZoomToExtentOptions.prototype.tipLabel;
  * @api stable
  */
 olx.control.ZoomToExtentOptions.prototype.extent;
+
+
+/**
+ * Class name for the button. Default is `ol-zoom-extent-btn`.
+ * @type {string|undefined}
+ * @api stable
+ */
+olx.control.ZoomToExtentOptions.prototype.buttonClassName;
 
 
 /**
