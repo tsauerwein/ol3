@@ -18,6 +18,7 @@ var projection = new ol.proj.Projection({
 });
 
 var map = new ol.Map({
+  renderer: exampleNS.getRendererFromQueryString(),
   layers: [
     new ol.layer.Image({
       source: new ol.source.ImageStatic({
@@ -26,7 +27,7 @@ var map = new ol.Map({
             html: '&copy; <a href="http://xkcd.com/license.html">xkcd</a>'
           })
         ],
-        url: 'http://imgs.xkcd.com/comics/online_communities.png',
+        url: 'data/online_communities.png',
         projection: projection,
         imageExtent: extent
       })
@@ -38,4 +39,14 @@ var map = new ol.Map({
     center: ol.extent.getCenter(extent),
     zoom: 2
   })
+});
+
+$(map.getViewport()).on('mousemove', function(evt) {
+  var pixel = map.getEventPixel(evt.originalEvent);
+  var hit = map.forEachLayerAtPixel(pixel, function(layer) {
+    return true;
+  }, this, function(layer) {
+    return layer instanceof ol.layer.Image;
+  });
+  map.getTargetElement().style.cursor = hit ? 'pointer' : '';
 });

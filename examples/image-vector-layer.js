@@ -12,6 +12,7 @@ goog.require('ol.style.Style');
 
 
 var map = new ol.Map({
+  renderer: exampleNS.getRendererFromQueryString(),
   layers: [
     new ol.layer.Tile({
       source: new ol.source.MapQuest({layer: 'sat'})
@@ -24,7 +25,7 @@ var map = new ol.Map({
         }),
         style: new ol.style.Style({
           fill: new ol.style.Fill({
-            color: 'rgba(255, 255, 255, 0.6)'
+            color: 'rgba(255, 255, 255, 0.0)'
           }),
           stroke: new ol.style.Stroke({
             color: '#319FD3',
@@ -70,10 +71,10 @@ var displayFeatureInfo = function(pixel) {
 
   if (feature !== highlight) {
     if (highlight) {
-      featureOverlay.removeFeature(highlight);
+      //featureOverlay.removeFeature(highlight);
     }
     if (feature) {
-      featureOverlay.addFeature(feature);
+      //featureOverlay.addFeature(feature);
     }
     highlight = feature;
   }
@@ -87,4 +88,15 @@ $(map.getViewport()).on('mousemove', function(evt) {
 
 map.on('click', function(evt) {
   displayFeatureInfo(evt.pixel);
+});
+
+$(map.getViewport()).on('mousemove', function(evt) {
+  var pixel = map.getEventPixel(evt.originalEvent);
+  var hit = map.hasFeatureAtPixel(pixel);
+  // var hit = map.forEachLayerAtPixel(pixel, function(layer) {
+  //   return true;
+  // }, this, function(layer) {
+  //   return layer instanceof ol.layer.Image;
+  // });
+  map.getTargetElement().style.cursor = hit ? 'pointer' : '';
 });

@@ -132,8 +132,16 @@ map.on('click', function(evt) {
   }, 1);
 });
 
+// $(map.getViewport()).on('mousemove', function(evt) {
+//   var pixel = map.getEventPixel(evt.originalEvent);
+//   var hit = map.hasFeatureAtPixel(pixel);
+//   map.getTarget().style.cursor = hit ? 'pointer' : '';
+// });
+
 $(map.getViewport()).on('mousemove', function(evt) {
   var pixel = map.getEventPixel(evt.originalEvent);
-  var hit = map.hasFeatureAtPixel(pixel);
-  map.getTarget().style.cursor = hit ? 'pointer' : '';
+  var hit = map.forEachLayerAtPixel(pixel, function(layer) {
+    return true;
+  });
+  map.getTargetElement().style.cursor = hit ? 'pointer' : '';
 });
