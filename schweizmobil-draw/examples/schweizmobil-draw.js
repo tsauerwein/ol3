@@ -111,6 +111,15 @@ $('#remove-last-point').click(function(e) {
   drawInteraction.removeLastPoint();
 });
 
+$('#map').keypress(function(e) {
+  // to listen on `keypress` the map div must have a
+  // `tabindex="1"` attribute
+  if (e.which === 127) {
+    // remove last point when pressing DEL
+    drawInteraction.removeLastPoint();
+  }
+});
+
 drawInteraction.on('trackchanged', function(evt) {
   $('#remove-last-point').prop('disabled', !drawInteraction.hasPoints());
 });
