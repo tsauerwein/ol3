@@ -169,6 +169,7 @@ goog.inherits(ol.interaction.DrawTrack, ol.interaction.Pointer);
 
 /**
  * @return {boolean} Snap?
+ * @api
  */
 ol.interaction.DrawTrack.prototype.getSnap = function() {
   return this.snap_;
@@ -177,6 +178,7 @@ ol.interaction.DrawTrack.prototype.getSnap = function() {
 
 /**
  * @param {boolean} snap Snap?
+ * @api
  */
 ol.interaction.DrawTrack.prototype.setSnap = function(snap) {
   this.snap_ = snap;
@@ -185,6 +187,7 @@ ol.interaction.DrawTrack.prototype.setSnap = function(snap) {
 
 /**
  * @return {string} The OSRM profile used.
+ * @api
  */
 ol.interaction.DrawTrack.prototype.getProfile = function() {
   return this.osrmProfile_;
@@ -193,6 +196,7 @@ ol.interaction.DrawTrack.prototype.getProfile = function() {
 
 /**
  * @param {string} profile The OSRM profile to use.
+ * @api
  */
 ol.interaction.DrawTrack.prototype.setProfile = function(profile) {
   this.osrmProfile_ = profile;
@@ -201,6 +205,7 @@ ol.interaction.DrawTrack.prototype.setProfile = function(profile) {
 
 /**
  * @return {boolean} Does the track have points?
+ * @api
  */
 ol.interaction.DrawTrack.prototype.hasPoints = function() {
   return this.controlPoints_.length > 0;
@@ -240,6 +245,7 @@ ol.interaction.DrawTrack.prototype.onDrawEnd_ = function(evt) {
 
 /**
  * Remove the last control point.
+ * @api
  */
 ol.interaction.DrawTrack.prototype.removeLastPoint = function() {
   if (this.controlPoints_.length === 0 || this.lastPoint_ === null) {
