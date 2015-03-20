@@ -1,6 +1,6 @@
 // OpenLayers 3. See http://openlayers.org/
 // License: https://raw.githubusercontent.com/openlayers/ol3/master/LICENSE.md
-// Version: v3.1.0-pre.2-904-gb11cd53
+// Version: v3.1.0-pre.2-904-gae0abdc
 
 (function (root, factory) {
   if (typeof define === "function" && define.amd) {
@@ -107849,6 +107849,7 @@ ol.style.RegularShape.prototype.getChecksum = function() {
 };
 
 goog.provide('ol.interaction.DrawTrack');
+goog.provide('ol.interaction.DrawTrackOptions');
 goog.provide('ol.interaction.TrackEventType');
 
 goog.require('goog.asserts');
@@ -107877,6 +107878,7 @@ goog.require('ol.style.Style');
  *    style:(ol.style.Style|Array.<ol.style.Style>|ol.style.StyleFunction|undefined),
  *    sketchStyle:(ol.style.Style|Array.<ol.style.Style>|ol.style.StyleFunction|undefined)
  * }}
+ * @api
  */
 ol.interaction.DrawTrackOptions;
 
@@ -107960,7 +107962,21 @@ ol.interaction.DrawTrack = function(opt_options) {
         }))
   });
 
+  var defaulSketchStyle = new ol.style.Style({
+    image: new ol.style.RegularShape(
+        /** @type {olx.style.RegularShapeOptions} */({
+          fill: new ol.style.Fill({
+            color: '#d80000'
+          }),
+          points: 4,
+          radius: 8,
+          angle: Math.PI / 4
+        }))
+  });
+
   var style = goog.isDef(options.style) ? options.style : [defaulStyle];
+  var sketchStyle = goog.isDef(options.sketchStyle) ?
+      options.sketchStyle : [defaulSketchStyle];
 
   /**
    * The control points of the track.
@@ -108007,7 +108023,7 @@ ol.interaction.DrawTrack = function(opt_options) {
   this.drawInteraction_ = new ol.interaction.Draw(
       /** @type {olx.interaction.DrawOptions} */ ({
         type: 'Point',
-        style: options.sketchStyle
+        style: sketchStyle
       }));
 
   goog.events.listen(this.drawInteraction_, ol.DrawEventType.DRAWEND,
@@ -115998,6 +116014,7 @@ goog.require('ol.interaction.DragRotateAndZoom');
 goog.require('ol.interaction.DragZoom');
 goog.require('ol.interaction.Draw');
 goog.require('ol.interaction.DrawTrack');
+goog.require('ol.interaction.DrawTrackOptions');
 goog.require('ol.interaction.Interaction');
 goog.require('ol.interaction.InteractionProperty');
 goog.require('ol.interaction.KeyboardPan');

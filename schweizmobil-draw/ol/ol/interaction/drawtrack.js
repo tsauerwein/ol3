@@ -1,4 +1,5 @@
 goog.provide('ol.interaction.DrawTrack');
+goog.provide('ol.interaction.DrawTrackOptions');
 goog.provide('ol.interaction.TrackEventType');
 
 goog.require('goog.asserts');
@@ -27,6 +28,7 @@ goog.require('ol.style.Style');
  *    style:(ol.style.Style|Array.<ol.style.Style>|ol.style.StyleFunction|undefined),
  *    sketchStyle:(ol.style.Style|Array.<ol.style.Style>|ol.style.StyleFunction|undefined)
  * }}
+ * @api
  */
 ol.interaction.DrawTrackOptions;
 
@@ -110,7 +112,21 @@ ol.interaction.DrawTrack = function(opt_options) {
         }))
   });
 
+  var defaulSketchStyle = new ol.style.Style({
+    image: new ol.style.RegularShape(
+        /** @type {olx.style.RegularShapeOptions} */({
+          fill: new ol.style.Fill({
+            color: '#d80000'
+          }),
+          points: 4,
+          radius: 8,
+          angle: Math.PI / 4
+        }))
+  });
+
   var style = goog.isDef(options.style) ? options.style : [defaulStyle];
+  var sketchStyle = goog.isDef(options.sketchStyle) ?
+      options.sketchStyle : [defaulSketchStyle];
 
   /**
    * The control points of the track.
@@ -157,7 +173,7 @@ ol.interaction.DrawTrack = function(opt_options) {
   this.drawInteraction_ = new ol.interaction.Draw(
       /** @type {olx.interaction.DrawOptions} */ ({
         type: 'Point',
-        style: options.sketchStyle
+        style: sketchStyle
       }));
 
   goog.events.listen(this.drawInteraction_, ol.DrawEventType.DRAWEND,

@@ -104,20 +104,7 @@ var map = new ol.Map({
   })
 });
 
-var drawInteraction = new ol.interaction.DrawTrack({
-  snap: true,
-  sketchStyle: new ol.style.Style({
-    image: new ol.style.RegularShape(
-        /** @type {olx.style.RegularShapeOptions} */({
-          fill: new ol.style.Fill({
-            color: '#d80000'
-          }),
-          points: 4,
-          radius: 8,
-          angle: Math.PI / 4
-        }))
-  })
-});
+var drawInteraction = new ol.interaction.DrawTrack();
 map.addInteraction(drawInteraction);
 
 $('#remove-last-point').click(function(e) {
