@@ -1636,6 +1636,31 @@ olx.format.GeoJSONOptions.prototype.geometryName;
 
 
 /**
+ * @typedef {{layers: (Array.<string>|undefined)),
+ *     tileSpace: (boolean|undefined)}}
+ * @api
+ */
+olx.format.ProtobufVectorTileOptions;
+
+
+/**
+ * The names of the layers to read.
+ * @type {Array.<string>|undefined}
+ * @api
+ */
+olx.format.ProtobufVectorTileOptions.prototype.layers;
+
+
+/**
+ * If this property is set to `true`, the coordinates will not
+ * be reprojected to `EPSG:4326`.
+ * @type {boolean|undefined}
+ * @api
+ */
+olx.format.ProtobufVectorTileOptions.prototype.tileSpace;
+
+
+/**
  * @typedef {{factor: (number|undefined),
  *     geometryLayout: (ol.geom.GeometryLayout|undefined)}}
  * @api
