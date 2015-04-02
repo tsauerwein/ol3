@@ -141,6 +141,10 @@ SPEC = [path
         for path in ifind('test/spec')
         if path.endswith('.js')]
 
+SPEC_RENDERING = [path
+        for path in ifind('test_rendering/spec')
+        if path.endswith('.js')]
+
 TASKS = [path
          for path in ifind('tasks')
          if path.endswith('.js')]
@@ -168,7 +172,7 @@ def report_sizes(t):
 virtual('default', 'build')
 
 
-virtual('ci', 'lint', 'build', 'test',
+virtual('ci', 'lint', 'build', 'test', 'test-rendering',
     'build/examples/all.combined.js', 'check-examples', 'apidoc')
 
 
@@ -227,17 +231,26 @@ for glsl_src in GLSL_SRC:
     shader_src_helper(glsl_src)
 
 
-@target('build/test/requireall.js', SPEC)
-def build_test_requireall_js(t):
+def build_requires(task):
     requires = set()
-    for dependency in t.dependencies:
+    for dependency in task.dependencies:
         for line in open(dependency, 'rU'):
             match = re.match(r'goog\.provide\(\'(.*)\'\);', line)
             if match:
                 requires.add(match.group(1))
-    with open(t.name, 'wb') as f:
+    with open(task.name, 'wb') as f:
         for require in sorted(requires):
             f.write('goog.require(\'%s\');\n' % (require,))
+
+
+@target('build/test_requires.js', SPEC)
+def build_test_requires(t):
+  build_requires(t)
+
+
+@target('build/test_rendering_requires.js', SPEC_RENDERING)
+def build_test_rendering_requires(t):
+  build_requires(t)
 
 
 virtual('build-examples', 'examples', 'build/examples/all.combined.js',
@@ -385,7 +398,8 @@ def examples_star_combined_js(name, match):
     return Target(name, action=action, dependencies=dependencies)
 
 
-@target('serve', 'examples', NPM_INSTALL)
+@target('serve', 'examples', 'build/test_requires.js', 'build/test_rendering_requires.js',
+        NPM_INSTALL)
 def serve(t):
     t.run('node', 'tasks/serve.js')
 
@@ -394,7 +408,8 @@ virtual('lint', 'build/lint-timestamp', 'build/check-requires-timestamp',
     'build/check-whitespace-timestamp', 'jshint')
 
 
-@target('build/lint-timestamp', SRC, EXAMPLES_SRC, SPEC, precious=True)
+@target('build/lint-timestamp', SRC, EXAMPLES_SRC, SPEC, SPEC_RENDERING,
+        precious=True)
 def build_lint_src_timestamp(t):
     t.run('%(GJSLINT)s',
           '--jslint_error=all',
@@ -405,8 +420,8 @@ def build_lint_src_timestamp(t):
 
 virtual('jshint', 'build/jshint-timestamp')
 
-@target('build/jshint-timestamp', SRC, EXAMPLES_SRC, SPEC, TASKS,
-        NPM_INSTALL, precious=True)
+@target('build/jshint-timestamp', SRC, EXAMPLES_SRC, SPEC, SPEC_RENDERING,
+        TASKS, NPM_INSTALL, precious=True)
 def build_jshint_timestamp(t):
     t.run(variables.JSHINT, '--verbose', t.newer(t.dependencies))
     t.touch()
@@ -435,7 +450,8 @@ def _strip_comments(lines):
                 yield lineno, line
 
 
-@target('build/check-requires-timestamp', SRC, EXAMPLES_SRC, SHADER_SRC, SPEC)
+@target('build/check-requires-timestamp', SRC, EXAMPLES_SRC, SHADER_SRC,
+        SPEC, SPEC_RENDERING)
 def build_check_requires_timestamp(t):
     unused_count = 0
     all_provides = set()
@@ -576,7 +592,7 @@ def build_check_requires_timestamp(t):
 
 
 @target('build/check-whitespace-timestamp', SRC, EXAMPLES_SRC,
-        SPEC, JSDOC_SRC, precious=True)
+        SPEC, SPEC_RENDERING, JSDOC_SRC, precious=True)
 def build_check_whitespace_timestamp(t):
     CR_RE = re.compile(r'\r')
     LEADING_WHITESPACE_RE = re.compile(r'\s+')
@@ -713,9 +729,19 @@ def check_examples(t):
         sys.exit(1)
 
 
-@target('test', NPM_INSTALL, phony=True)
+@target('test', NPM_INSTALL, 'build/test_requires.js', phony=True)
 def test(t):
     t.run('node', 'tasks/test.js')
+
+
+@target('test-rendering', 'build/test_rendering_requires.js',
+        NPM_INSTALL, phony=True)
+def test_rendering(t):
+    # create a temp. profile to run the tests with WebGL
+    tmp_profile_dir = 'build/slimerjs-profile'
+    t.rm_rf(tmp_profile_dir)
+    t.cp_r('test_rendering/slimerjs-profile', tmp_profile_dir)
+    t.run('node', 'tasks/test-rendering.js')
 
 
 @target('fixme', phony=True)
@@ -782,6 +808,7 @@ The most common targets are:
                      CSS. This is also the default build target which runs when
                      no target is specified.
   test             - Runs the testsuite and displays the results.
+  test-rendering   - Runs the rendering testsuite and displays the results.
   check            - Runs the lint-target, builds some OpenLayers files, and
                      then runs test. Many developers call this target often
                      while working on the code.
@@ -791,9 +818,9 @@ Other less frequently used targets are:
   apidoc           - Builds the API-Documentation using JSDoc3.
   ci               - Builds all examples in various modes and usually takes a
                      long time to finish. This target calls the following
-                     targets: lint, build, build-all, test, build-examples,
-                     check-examples and apidoc. This is the target run on
-                     Travis CI.
+                     targets: lint, build, build-all, test, test-rendering,
+                     build-examples, check-examples and apidoc. This is the
+                     target run on Travis CI.
   reallyclean      - Remove untracked files from the repository.
   checkdeps        - Checks whether all required development software is
                      installed on your machine.
