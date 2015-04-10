@@ -37,7 +37,13 @@ ol.interaction.TrackEventType = {
    * Triggered when the track has changed.
    * @event goog.events.Event#trackchanged
    */
-  TRACKCHANGED: 'trackchanged'
+  TRACKCHANGED: 'trackchanged',
+
+  /**
+   * Triggered when a segment has changed.
+   * @event goog.events.Event#trackchanged
+   */
+  SEGMENTCHANGED: 'segmentchanged'
 };
 
 
@@ -300,4 +306,13 @@ ol.interaction.Track.prototype.setMap = function(map) {
 ol.interaction.Track.prototype.dispatchChangeEvent = function() {
   this.dispatchEvent(new goog.events.Event(
       ol.interaction.TrackEventType.TRACKCHANGED));
+};
+
+
+/**
+ * @protected
+ */
+ol.interaction.Track.prototype.dispatchSegmentChangeEvent = function() {
+  this.dispatchEvent(new goog.events.Event(
+      ol.interaction.TrackEventType.SEGMENTCHANGED));
 };
