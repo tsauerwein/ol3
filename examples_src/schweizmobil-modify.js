@@ -1,10 +1,10 @@
 goog.require('ol.Map');
 goog.require('ol.View');
+goog.require('ol.format.GeoJSON');
 goog.require('ol.interaction.ModifyTrack');
 goog.require('ol.layer.Tile');
 goog.require('ol.layer.Vector');
 goog.require('ol.proj');
-goog.require('ol.source.GeoJSON');
 goog.require('ol.source.Vector');
 goog.require('ol.source.WMTS');
 goog.require('ol.style.Circle');
@@ -123,24 +123,36 @@ var map = new ol.Map({
 var modifyInteraction = new ol.interaction.ModifyTrack();
 map.addInteraction(modifyInteraction);
 
-var pointSource = new ol.source.GeoJSON({
-  url: 'data/geojson/schweizmobil-track-points.geojson'
-});
-var segmentSource = new ol.source.GeoJSON({
-  url: 'data/geojson/schweizmobil-track-segments.geojson'
-});
+
+var geojsonFormat = new ol.format.GeoJSON();
+var filesLoaded = 0;
 
 var onSourceLoaded = function(evt) {
-  if (pointSource.getState() !== 'ready' ||
-      segmentSource.getState() !== 'ready') {
+  console.log('onSourceLoaded');
+  if (filesLoaded < 2) {
     return;
   }
   modifyInteraction.setTrack(
       pointSource.getFeatures(), segmentSource.getFeatures());
 };
 
-pointSource.on('change', onSourceLoaded);
-segmentSource.on('change', onSourceLoaded);
+var pointSource = new ol.source.Vector();
+var pointsFile = 'data/geojson/schweizmobil-track-points.geojson';
+$.ajax(pointsFile).then(function(response) {
+  var features = geojsonFormat.readFeatures(response);
+  pointSource.addFeatures(features);
+  filesLoaded++;
+  onSourceLoaded();
+});
+
+var segmentSource = new ol.source.Vector();
+var segmentsFile = 'data/geojson/schweizmobil-track-segments.geojson';
+$.ajax(segmentsFile).then(function(response) {
+  var features = geojsonFormat.readFeatures(response);
+  segmentSource.addFeatures(features);
+  filesLoaded++;
+  onSourceLoaded();
+});
 
 modifyInteraction.on('trackchanged', function(evt) {
   // ..
