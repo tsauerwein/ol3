@@ -28,12 +28,13 @@ describe('ol.pointer.PointerEventHandler', function() {
     });
   });
 
-  function simulateEvent(type, x, y) {
+  function simulateEvent(type, x, y, relatedTarget) {
     var event = new goog.events.BrowserEvent({
       type: type,
       clientX: x,
       clientY: y,
-      target: target
+      target: target,
+      relatedTarget: relatedTarget
     });
     goog.events.fireListeners(target, type, false, event);
   }
@@ -77,7 +78,8 @@ describe('ol.pointer.PointerEventHandler', function() {
       goog.events.listen(handler, 'pointerenter', enterEventSpy);
       goog.events.listen(handler, 'pointerover', overEventSpy);
 
-      simulateEvent('mouseover', 0, 0);
+      var relatedTarget = goog.dom.createElement(goog.dom.TagName.DIV);
+      simulateEvent('mouseover', 0, 0, relatedTarget);
 
       expect(enterEventSpy.calledOnce).to.be.ok();
       expect(overEventSpy.calledOnce).to.be.ok();
@@ -92,7 +94,8 @@ describe('ol.pointer.PointerEventHandler', function() {
       goog.events.listen(handler, 'pointerleave', leaveEventSpy);
       goog.events.listen(handler, 'pointerout', outEventSpy);
 
-      simulateEvent('mouseout', 0, 0);
+      var relatedTarget = goog.dom.createElement(goog.dom.TagName.DIV);
+      simulateEvent('mouseout', 0, 0, relatedTarget);
 
       expect(leaveEventSpy.calledOnce).to.be.ok();
       expect(outEventSpy.calledOnce).to.be.ok();
