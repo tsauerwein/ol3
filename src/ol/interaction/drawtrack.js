@@ -8,6 +8,7 @@ goog.require('ol.Feature');
 goog.require('ol.Object');
 goog.require('ol.coordinate');
 goog.require('ol.format.Polyline');
+goog.require('ol.geom.GeometryLayout');
 goog.require('ol.geom.LineString');
 goog.require('ol.geom.Point');
 goog.require('ol.interaction.Draw');
