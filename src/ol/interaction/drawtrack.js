@@ -6,7 +6,6 @@ goog.require('goog.net.XhrIo');
 goog.require('ol.DrawEventType');
 goog.require('ol.Feature');
 goog.require('ol.Object');
-goog.require('ol.coordinate');
 goog.require('ol.format.Polyline');
 goog.require('ol.geom.GeometryLayout');
 goog.require('ol.geom.LineString');
@@ -219,7 +218,7 @@ ol.interaction.DrawTrack.prototype.requestSnapPoint_ = function(feature) {
  */
 ol.interaction.DrawTrack.prototype.snapPoint_ = function(feature, mappedPoint) {
   var point = /** @type {ol.geom.Point} */ (feature.getGeometry());
-  if (!this.isValidSnap_(point, mappedPoint)) {
+  if (!this.isValidSnap(point, mappedPoint)) {
     return;
   }
   feature.set('snapped', true);
@@ -296,26 +295,4 @@ ol.interaction.DrawTrack.prototype.requestRoute_ =
       this.dispatchChangeEvent();
     }
   }, this));
-};
-
-
-/**
- * @param {ol.geom.Point} originalPoint
- * @param {ol.geom.Point} mappedPoint
- * @return {boolean}
- * @private
- */
-ol.interaction.DrawTrack.prototype.isValidSnap_ =
-    function(originalPoint, mappedPoint) {
-  var map = this.getMap();
-
-  var originalPointPx =
-      map.getPixelFromCoordinate(originalPoint.getCoordinates());
-  var mappedPointPx =
-      map.getPixelFromCoordinate(mappedPoint.getCoordinates());
-
-  var distance =
-      Math.sqrt(ol.coordinate.squaredDistance(originalPointPx, mappedPointPx));
-
-  return distance < this.snapTolerance;
 };

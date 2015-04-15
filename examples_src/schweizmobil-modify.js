@@ -113,9 +113,9 @@ var map = new ol.Map({
   target: 'map',
   view: new ol.View({
     enableRotation: false,
-    center: [650000, 130000],
+    center: [646245, 128465],
     projection: projection,
-    resolution: 20,
+    resolution: 5,
     resolutions: resolutions
   })
 });
@@ -125,32 +125,25 @@ map.addInteraction(modifyInteraction);
 
 
 var geojsonFormat = new ol.format.GeoJSON();
-var filesLoaded = 0;
+var controlPoints = null;
+var segments = null;
 
-var onSourceLoaded = function(evt) {
-  console.log('onSourceLoaded');
-  if (filesLoaded < 2) {
+var onSourceLoaded = function() {
+  if (controlPoints === null || segments === null) {
     return;
   }
-  modifyInteraction.setTrack(
-      pointSource.getFeatures(), segmentSource.getFeatures());
+  modifyInteraction.setTrack(controlPoints, segments);
 };
 
-var pointSource = new ol.source.Vector();
 var pointsFile = 'data/geojson/schweizmobil-track-points.geojson';
 $.ajax(pointsFile).then(function(response) {
-  var features = geojsonFormat.readFeatures(response);
-  pointSource.addFeatures(features);
-  filesLoaded++;
+  controlPoints = geojsonFormat.readFeatures(response);
   onSourceLoaded();
 });
 
-var segmentSource = new ol.source.Vector();
 var segmentsFile = 'data/geojson/schweizmobil-track-segments.geojson';
 $.ajax(segmentsFile).then(function(response) {
-  var features = geojsonFormat.readFeatures(response);
-  segmentSource.addFeatures(features);
-  filesLoaded++;
+  segments = geojsonFormat.readFeatures(response);
   onSourceLoaded();
 });
 

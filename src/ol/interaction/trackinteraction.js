@@ -22,7 +22,12 @@ goog.require('ol.style.Style');
  *    elevation: (boolean),
  *    snap: (boolean),
  *    style:(ol.style.Style|Array.<ol.style.Style>|ol.style.StyleFunction|undefined),
- *    sketchStyle:(ol.style.Style|Array.<ol.style.Style>|ol.style.StyleFunction|undefined)
+ *    sketchStyle:(ol.style.Style|Array.<ol.style.Style>|ol.style.StyleFunction|undefined),
+ *    handleDownEvent: (function(ol.MapBrowserPointerEvent):boolean|undefined),
+ *    handleDragEvent: (function(ol.MapBrowserPointerEvent)|undefined),
+ *    handleEvent: (function(ol.MapBrowserEvent):boolean|undefined),
+ *    handleMoveEvent: (function(ol.MapBrowserPointerEvent)|undefined),
+ *    handleUpEvent: (function(ol.MapBrowserPointerEvent):boolean|undefined)
  * }}
  * @api
  */
@@ -60,7 +65,13 @@ ol.interaction.Track = function(opt_options) {
 
   var options = goog.isDef(opt_options) ? opt_options : {};
 
-  goog.base(this);
+  goog.base(this, {
+    handleDownEvent: options.handleDownEvent,
+    handleDragEvent: options.handleDragEvent,
+    handleEvent: options.handleEvent,
+    handleMoveEvent: options.handleMoveEvent,
+    handleUpEvent: options.handleUpEvent
+  });
 
   /**
    * Request elevation data from OSRM?
@@ -286,6 +297,39 @@ ol.interaction.Track.prototype.getHeightProfile = function() {
  */
 ol.interaction.Track.prototype.hasPoints = function() {
   return this.controlPoints.length > 0;
+};
+
+
+/**
+ * @param {ol.geom.Point} originalPoint
+ * @param {ol.geom.Point} mappedPoint
+ * @return {boolean}
+ */
+ol.interaction.Track.prototype.isValidSnap =
+    function(originalPoint, mappedPoint) {
+  return this.isInTolerance(originalPoint, mappedPoint, this.snapTolerance);
+};
+
+
+/**
+ * @param {ol.geom.Point} originalPoint
+ * @param {ol.geom.Point} mappedPoint
+ * @param {number} tolerance
+ * @return {boolean}
+ */
+ol.interaction.Track.prototype.isInTolerance =
+    function(originalPoint, mappedPoint, tolerance) {
+  var map = this.getMap();
+
+  var originalPointPx =
+      map.getPixelFromCoordinate(originalPoint.getCoordinates());
+  var mappedPointPx =
+      map.getPixelFromCoordinate(mappedPoint.getCoordinates());
+
+  var distance =
+      Math.sqrt(ol.coordinate.squaredDistance(originalPointPx, mappedPointPx));
+
+  return distance < tolerance;
 };
 
 
