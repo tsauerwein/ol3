@@ -67,37 +67,36 @@ var flightsSource = new ol.source.Vector({
   attributions: [new ol.Attribution({
     html: 'Flight data by ' +
         '<a href="http://openflights.org/data.html">OpenFlights</a>,'
-  })],
-  loader: function(extent, resolution, projection) {
-    var url = 'data/openflights/flights.json';
-    $.ajax({url: url, dataType: 'json', success: function(response) {
-      var flightsData = response.flights;
-      for (var i = 0; i < flightsData.length; i++) {
-        var flight = flightsData[i];
-        var from = flight[0];
-        var to = flight[1];
-
-        // create an arc circle between the two locations
-        var arcGenerator = new arc.GreatCircle(
-            {x: from[1], y: from[0]},
-            {x: to[1], y: to[0]});
-
-        var arcLine = arcGenerator.Arc(100, {offset: 10});
-        if (arcLine.geometries.length === 1) {
-          var line = new ol.geom.LineString(arcLine.geometries[0].coords);
-          line.transform(ol.proj.get('EPSG:4326'), ol.proj.get('EPSG:3857'));
-
-          var feature = new ol.Feature({
-            geometry: line,
-            finished: false
-          });
-          addLater(feature, i * 50);
-        }
-      }
-      map.on('postcompose', animateFlights);
-    }});
-  }
+  })]
 });
+
+var url = 'data/openflights/flights.json';
+$.ajax({url: url, dataType: 'json', success: function(response) {
+  var flightsData = response.flights;
+  for (var i = 0; i < flightsData.length; i++) {
+    var flight = flightsData[i];
+    var from = flight[0];
+    var to = flight[1];
+
+    // create an arc circle between the two locations
+    var arcGenerator = new arc.GreatCircle(
+        {x: from[1], y: from[0]},
+        {x: to[1], y: to[0]});
+
+    var arcLine = arcGenerator.Arc(100, {offset: 10});
+    if (arcLine.geometries.length === 1) {
+      var line = new ol.geom.LineString(arcLine.geometries[0].coords);
+      line.transform(ol.proj.get('EPSG:4326'), ol.proj.get('EPSG:3857'));
+
+      var feature = new ol.Feature({
+        geometry: line,
+        finished: false
+      });
+      addLater(feature, i * 50);
+    }
+  }
+  map.on('postcompose', animateFlights);
+}});
 
 var flightsLayer = new ol.layer.Vector({
   source: flightsSource,

@@ -117,37 +117,36 @@ var flightsSource = new ol.source.Vector({
   attributions: [new ol.Attribution({
     html: &#x27;Flight data by &#x27; +
         &#x27;&lt;a href=&quot;http://openflights.org/data.html&quot;&gt;OpenFlights&lt;/a&gt;,&#x27;
-  })],
-  loader: function(extent, resolution, projection) {
-    var url = &#x27;data/openflights/flights.json&#x27;;
-    $.ajax({url: url, dataType: &#x27;json&#x27;, success: function(response) {
-      var flightsData = response.flights;
-      for (var i = 0; i &lt; flightsData.length; i++) {
-        var flight = flightsData[i];
-        var from = flight[0];
-        var to = flight[1];
-
-        // create an arc circle between the two locations
-        var arcGenerator = new arc.GreatCircle(
-            {x: from[1], y: from[0]},
-            {x: to[1], y: to[0]});
-
-        var arcLine = arcGenerator.Arc(100, {offset: 10});
-        if (arcLine.geometries.length === 1) {
-          var line = new ol.geom.LineString(arcLine.geometries[0].coords);
-          line.transform(ol.proj.get(&#x27;EPSG:4326&#x27;), ol.proj.get(&#x27;EPSG:3857&#x27;));
-
-          var feature = new ol.Feature({
-            geometry: line,
-            finished: false
-          });
-          addLater(feature, i * 50);
-        }
-      }
-      map.on(&#x27;postcompose&#x27;, animateFlights);
-    }});
-  }
+  })]
 });
+
+var url = &#x27;data/openflights/flights.json&#x27;;
+$.ajax({url: url, dataType: &#x27;json&#x27;, success: function(response) {
+  var flightsData = response.flights;
+  for (var i = 0; i &lt; flightsData.length; i++) {
+    var flight = flightsData[i];
+    var from = flight[0];
+    var to = flight[1];
+
+    // create an arc circle between the two locations
+    var arcGenerator = new arc.GreatCircle(
+        {x: from[1], y: from[0]},
+        {x: to[1], y: to[0]});
+
+    var arcLine = arcGenerator.Arc(100, {offset: 10});
+    if (arcLine.geometries.length === 1) {
+      var line = new ol.geom.LineString(arcLine.geometries[0].coords);
+      line.transform(ol.proj.get(&#x27;EPSG:4326&#x27;), ol.proj.get(&#x27;EPSG:3857&#x27;));
+
+      var feature = new ol.Feature({
+        geometry: line,
+        finished: false
+      });
+      addLater(feature, i * 50);
+    }
+  }
+  map.on(&#x27;postcompose&#x27;, animateFlights);
+}});
 
 var flightsLayer = new ol.layer.Vector({
   source: flightsSource,
@@ -264,37 +263,36 @@ var flightsSource = new ol.source.Vector({
   attributions: [new ol.Attribution({
     html: &#x27;Flight data by &#x27; +
         &#x27;&lt;a href=&quot;http://openflights.org/data.html&quot;&gt;OpenFlights&lt;/a&gt;,&#x27;
-  })],
-  loader: function(extent, resolution, projection) {
-    var url = &#x27;data/openflights/flights.json&#x27;;
-    $.ajax({url: url, dataType: &#x27;json&#x27;, success: function(response) {
-      var flightsData = response.flights;
-      for (var i = 0; i &lt; flightsData.length; i++) {
-        var flight = flightsData[i];
-        var from = flight[0];
-        var to = flight[1];
-
-        // create an arc circle between the two locations
-        var arcGenerator = new arc.GreatCircle(
-            {x: from[1], y: from[0]},
-            {x: to[1], y: to[0]});
-
-        var arcLine = arcGenerator.Arc(100, {offset: 10});
-        if (arcLine.geometries.length === 1) {
-          var line = new ol.geom.LineString(arcLine.geometries[0].coords);
-          line.transform(ol.proj.get(&#x27;EPSG:4326&#x27;), ol.proj.get(&#x27;EPSG:3857&#x27;));
-
-          var feature = new ol.Feature({
-            geometry: line,
-            finished: false
-          });
-          addLater(feature, i * 50);
-        }
-      }
-      map.on(&#x27;postcompose&#x27;, animateFlights);
-    }});
-  }
+  })]
 });
+
+var url = &#x27;data/openflights/flights.json&#x27;;
+$.ajax({url: url, dataType: &#x27;json&#x27;, success: function(response) {
+  var flightsData = response.flights;
+  for (var i = 0; i &lt; flightsData.length; i++) {
+    var flight = flightsData[i];
+    var from = flight[0];
+    var to = flight[1];
+
+    // create an arc circle between the two locations
+    var arcGenerator = new arc.GreatCircle(
+        {x: from[1], y: from[0]},
+        {x: to[1], y: to[0]});
+
+    var arcLine = arcGenerator.Arc(100, {offset: 10});
+    if (arcLine.geometries.length === 1) {
+      var line = new ol.geom.LineString(arcLine.geometries[0].coords);
+      line.transform(ol.proj.get(&#x27;EPSG:4326&#x27;), ol.proj.get(&#x27;EPSG:3857&#x27;));
+
+      var feature = new ol.Feature({
+        geometry: line,
+        finished: false
+      });
+      addLater(feature, i * 50);
+    }
+  }
+  map.on(&#x27;postcompose&#x27;, animateFlights);
+}});
 
 var flightsLayer = new ol.layer.Vector({
   source: flightsSource,
