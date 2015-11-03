@@ -1,0 +1,26 @@
+{
+"type": "FeatureCollection",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::21781" } },
+                                                                                
+"features": [
+{ "type": "Feature", "properties": { "FID_Sicher": 1, "FID_BBK": 17637, "kategorie": "vegbed", "Area": 0, "F_AREA": 19479.734881, "Shape_Leng": 1368.915567, "Shape_Area": 12408.947774 }, "geometry": { "type": "Polygon", "coordinates": [
+          [
+            [
+              601099, 196806
+            ],
+            [
+              601099, 196816
+            ],
+            [
+              601109, 196816
+            ],
+            [
+              601109, 196806
+            ],
+            [
+              601099, 196806
+            ]
+          ]
+        ] } }
+]
+}
